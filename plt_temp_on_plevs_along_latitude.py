@@ -174,6 +174,12 @@ for metallicity in ["solar","10xsolar"]:
         if ax.get_subplotspec().is_first_col():
             ax.set_ylabel("Pressure [Pa]")
         ax.set_yscale("log")
+        # Make axis common across all plots for each metallicity
+        if mdh == "MdH0":
+            ax.set_xlim(800,1800)
+        if mdh == "MdH1":
+            ax.set_xlim(700,2100)
+        ax.set_ylim(1e7, 1e2)
         ax.set_ylim(1e7, 1e2)
         ax.grid()
         figname = f"{mdh}_PT_{day}.png"
