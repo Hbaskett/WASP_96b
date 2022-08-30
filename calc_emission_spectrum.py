@@ -16,11 +16,13 @@ planet = "wasp96b"
 metallicity = "solar"
 exp = "equilibrium"
 
+# currently unuasble as phase curves not been synthesised so have no "dir_for_phase_curves"
+
 vrbls = {}
 vrbls[planet] = {}
 for exp in ["equilibrium", "kinetics"]:
     vrbls[planet][exp] = {}
-    for metallicity in ["solar"]:
+    for metallicity in ["solar", "10xsolar"]:
         # Load data
         star_constant_at_1_au = iris.cube.Cube(1272.8647540320192,long_name="stellar_constant_at_1_au",units="W m-2")
         path_to_spectral_file = SUITES[planet][exp][metallicity]["dir_for_star_spectrum_sw"]
