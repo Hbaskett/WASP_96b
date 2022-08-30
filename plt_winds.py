@@ -218,4 +218,4 @@ for metallicity in ["solar","10xsolar"]:
                     output_dir = Path.home() / "um" / "um_runs" / "winds" / mdh / f"day_{day}"  
             
                     fig.savefig(output_dir / figname) 
-                    fig.close()
+                    plt.close(fig)
