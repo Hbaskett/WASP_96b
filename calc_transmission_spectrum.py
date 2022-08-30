@@ -30,7 +30,7 @@ exp = "equilibrium"
 metallicity = "solar"
 set = "JWST"
 ty = "total"
-sps = ["total", "NH3", "CH4"] #"co", "co2", "h2o", "hcn"]
+sps = ["total"] #, "NH3", "CH4", "CO", "CO2", "H2O", "HCN"]
 
 def calc_transmission_spectrum_day_night_average(
     spectral_file,
@@ -118,9 +118,9 @@ planet_top_of_atmosphere = iris.cube.Cube(1.03e7 + 83893200.0,long_name="planet_
 # Calculate UM transmission spectra (total and contributions from individual gases)
 vrbls = {}
 vrbls[planet] = {}
-for exp in ["equilibrium", "kinetics"]:
+for exp in ["equilibrium"]: #,"kinetics"]:
     vrbls[planet][exp] = {}
-    for metallicity in ["solar"]: #,"10xsolar"]:
+    for metallicity in ["10xsolar"]: #,"10xsolar"]:
         vrbls[planet][exp][metallicity] = {}
         for sp in tqdm(sps):
             in_dict = {
@@ -174,37 +174,18 @@ for i in range(len(Err_Nik_R_p_over_R_s)):
     Err_Nik_R_p_over_R_s_sqr.append(a)
     
 # Plotting dictionaries for total or single contributions
-leg_line_kw_total = {"equilibrium": {"color": "orange","linestyle": "-"},
-                      "kinetics": {"color": "green", "linestyle": "-"},
+leg_exp_styles = {"equilibrium": {"linestyle": "dashed", "linewidth": 1, "color": "orange"},
+                      #"kinetics": {"linestyle": "solid", "linewidth": 1, "color": "green"},
                       }
 
-leg_line_kw_single = {"equilibrium": {"color": "orange","linestyle": "--"},
-                      "kinetics": {"color": "green","linestyle": "--"},
-                      }
-#print(leg_line_kw_single.items(), "\n")
-                      
-#label = {
-#    "equilibrium": {
-#        "total": {"label": "total","color": "orange","linestyle": "-"},
-#        "NH3": {"label": "NH3","color": "orange","linestyle": "--"},
-#        "CH4": {"label": "CH4","color": "orange","linestyle": "--"},
-#    },
-#    "kinetics": {
-#        "total": {"label": "total","color": "green","linestyle": "-"},
-#        "NH3": {"label": "NH3","color": "green","linestyle": "--"},
-#        "CH4": {"label": "CH4","color": "green","linestyle": "--"},
-#    },
-#}
-
-#print(label.items(), "\n")
-#print(label[exp].items(), "\n")
-
-for metallicity in ["solar"]: #,"10xsolar"]:
+for metallicity in ["10xsolar"]: #,"10xsolar"]:
 
     if metallicity == "solar":
         mdh = "MdH0"
+        shift = 0.0012
     if metallicity == "10xsolar":
         mdh = "MdH1"
+        shift = 0.0014
     
     for sp in tqdm(sps):
         # select plotting dictionary for total or single contributions
@@ -217,24 +198,28 @@ for metallicity in ["solar"]: #,"10xsolar"]:
         # Add UM data
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12, 6.75), constrained_layout=True, sharex=True)
         iletters = subplot_label_generator()
-        for exp, plt_kw in .items():
+        for exp, clr, linestyle in zip(["equilibrium"], ["orange"], ["dashed"]): #,"kinetics"], ["orange","green"], ["dashed","solid"]):
             spectral_band_centers = vrbls[planet][exp][metallicity][sp]["spectral_band_centers"]
             rp_eff_over_rs = vrbls[planet][exp][metallicity][sp]["rp_eff_over_rs"]
             ax.plot(
                 spectral_band_centers * 1e6,
-                rp_eff_over_rs.data ** 2 - 0.0012,
-                **plt_kw,
+                rp_eff_over_rs.data ** 2 - shift,
+                label = exp,
+                color = clr,
+                linestyle = linestyle,
             )
         
         # Plot total transmission for comparison to single element contribution
         if sp != "total":
-            for exp, ty, plt_kw in zip(["equilibrium","kinetics"],["total"], label[exp][ty].items()):
+            for exp, clr, linestyle in zip(["equilibrium"], ["cyan"], ["dashed"]): #,"kinetics"], ["cyan","grey"], ["dashed","solid"]):
                 spectral_band_centers = vrbls[planet][exp][metallicity]["total"]["spectral_band_centers"]
                 rp_eff_over_rs = vrbls[planet][exp][metallicity]["total"]["rp_eff_over_rs"]
                 ax.plot(
                     spectral_band_centers * 1e6,
-                    rp_eff_over_rs.data ** 2 - 0.0012,
-                    plt_kw,
+                    rp_eff_over_rs.data ** 2 - shift,
+                    label = exp,
+                    color = clr,
+                    linestyle = linestyle
                 )
         
         # Only plot observational data for total transmission spectrum
@@ -261,7 +246,8 @@ for metallicity in ["solar"]: #,"10xsolar"]:
                 fmt = 'o',
                 alpha = 0.3,
             )
-    
+        
+        # Set x axis for gas species 
         ax.set_xlim(0.2,12)
         
         # Set specifics for total contribution plot
@@ -273,6 +259,10 @@ for metallicity in ["solar"]: #,"10xsolar"]:
         ax.set_title(f"{sp} Transmission Spectrum at {metallicity} Metallicity")
         ax.set_xlabel("Wavelength [$\mu$m]")
         ax.set_ylabel("($R_p/R_s)^2$")
+        ax.legend()
+        
+        #lines_exp = [Line2D([0], [0], **style) for style in leg_exp_styles.values()]
+        
         
         output_dir = Path.home() / "um" / "um_runs" / "trans"
         figname = f"{mdh}_trans_{sp}.png"
