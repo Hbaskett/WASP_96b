@@ -63,6 +63,9 @@ for metallicity in ["solar","10xsolar"]:
     for exp, plt_kw in leg_line_kw.items():
         for label, ax in zip(["mass", "angular_momentum", "KE"], axs.reshape(-1)):
             ax.set_title(f"{label} conservation at {metallicity} metallicity")
+            # Correctly title KE plot
+            if label == "KE":
+                ax.set_title(f"{label} change at {metallicity} metallicity")
             df = vrbls[planet][exp][metallicity]["conserved"]
             ax.plot(df["timestep"], df[label], linewidth=1, label = label)
             ax.set_ylabel(label)
