@@ -22,11 +22,12 @@ images_MdH1 = []
 
 for mdh in ["MdH0","MdH1"]:
     
+    # select length of gifs and time intervals of gifs for each metallicity
     if mdh == "MdH0":
         day_step = np.arange(10,1010,10)
         images = images_MdH0
     if mdh == "MdH1":
-        day_step = np.arange(10,710,10)
+        day_step = np.arange(10,1010,10)
         images = images_MdH1
         
     if select == 0:
@@ -34,7 +35,7 @@ for mdh in ["MdH0","MdH1"]:
         for x in ["zonal","meridonal","vertical"]:
             for y in ["zonal","meridonal","vertical"]:
             
-                images.clear()
+                images.clear() # using append so need to clear lists before appending each set of images
                 for day in day_step:
         
                     # Choose images to compile
@@ -63,3 +64,21 @@ for mdh in ["MdH0","MdH1"]:
             images.append(imageio.imread(image_dir / image_file))
         
         imageio.mimsave(gif_dir / gif_file, images)
+       
+    if select == 2:
+    
+        for gas in tqdm(gases):
+    
+            images.clear()
+            for day in day_step:
+        
+                # Choose images to compile
+                image_dir = Path.home() / "um" / "um_runs" / "chem_lats" / mdh / gas
+                image_file = f"{mdh}_{gas}_Chem_{day}.png"
+        
+                # Choose name and output directory of final gif
+                gif_dir = Path.home() / "um" / "um_runs" / "chem_lats" / mdh
+                gif_file = f"{mdh}_{gas}_Chem_total.gif"
+                images.append(imageio.imread(image_dir / image_file))
+        
+            imageio.mimsave(gif_dir / gif_file, images)
